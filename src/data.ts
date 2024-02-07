@@ -15,6 +15,14 @@ export type GroupScheduleResponse = {
   extra: string;
 }
 
+export type ScheduleData = {
+  data: GroupScheduleResponse[];
+}
+
+export type ScheduleCardData = {
+  data: GroupScheduleResponse;
+}
+
 export const data: GroupScheduleResponse[] = [
   {
     serviceDayName: '01/02/2024',

@@ -1,91 +1,67 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { data, GroupScheduleResponse } from './data';
+import Box from '@mui/material/Paper';
+import { data } from './data';
+import { Typography } from '@mui/material';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import ScheduleTable from './components/ScheduleTable';
+import CardSchedule from './components/CardSchedule';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
-  '&:last-child td, &:last-child th': {
-    border: 0,
-  },
-}));
-
-const createTableHeaders = (groupSchedule: GroupScheduleResponse[]): string[] => {
-  const [data] = groupSchedule;
-  return Object.keys(data);
-};
-
-const getHeaderDescription = (key: string) => {
-  const headerMapper: Record<string, string> = {
-    serviceDayName: 'Dia',
-    weekDayName: 'Dia - Semana',
-    drummer: 'Bateria',
-    pianist: 'Teclado',
-    guitar_player: 'Guitarra',
-    bassist: 'Baixo',
-    acoustic_guitar_player: 'Violão',
-    vocal_alto: 'Contralto',
-    vocal_soprano: 'Soprano',
-    vocal_tenor: 'Tenor',
-    ministry: 'Ministro',
-    horn_player: 'Trompete',
-    sax_player: 'Sax',
-    extra: 'Extra',
-  };
-
-  return headerMapper[key];
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
 }
 
-const createTableRow = (groupSchedule: GroupScheduleResponse): string[] => {
-  const tableHeaders = createTableHeaders([groupSchedule]);
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
 
-  const response = tableHeaders.map((header) => {
-    return groupSchedule[header as keyof GroupScheduleResponse];
-  });
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
 
-  return response;
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
 }
 
 export default function App() {
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 700 }} aria-label="customized table">
-        <TableHead>
-          <TableRow style={{ fontWeight: 'bold' }}>
-            {createTableHeaders(data).map(item => (
-              <StyledTableCell style={{ fontWeight: 'bold' }}>{getHeaderDescription(item)}</StyledTableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((item) => (
-            <StyledTableRow key={item.serviceDayName}>
-              {createTableRow(item).map(row => (
-                <StyledTableCell>{row}</StyledTableCell>
-              ))}
-            </StyledTableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="Tabela" {...a11yProps(0)} />
+          <Tab label="Cards" {...a11yProps(1)} />
+        </Tabs>
+      </Box>
+      <CustomTabPanel value={value} index={0}>
+        <ScheduleTable data={data}/>
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        <CardSchedule />
+      </CustomTabPanel>
+    </Box>
   );
 }
+
