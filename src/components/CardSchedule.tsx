@@ -1,105 +1,138 @@
 import * as React from 'react';
-import { Box } from '@mui/material';
-import { styled } from '@mui/material/styles';
+
+import { Box, Button, Chip, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Modal, Typography } from '@mui/material';
 import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
-import CardActions from '@mui/material/CardActions';
-import Collapse from '@mui/material/Collapse';
-import IconButton, { IconButtonProps } from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { data, GroupScheduleResponse, ScheduleCardData } from '../data';
+import { data, ScheduleCardData } from '../data';
+import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
+import { getHeaderDescription } from '../utils/utils';
+import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import MicExternalOnIcon from '@mui/icons-material/MicExternalOn';
 
-interface ExpandMoreProps extends IconButtonProps {
-  expand: boolean;
-}
-
-const ExpandMore = styled((props: ExpandMoreProps) => {
-  const { expand, ...other } = props;
-  return <IconButton {...other} />;
-})(({ theme, expand }) => ({
-  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
-  marginLeft: 'auto',
-  transition: theme.transitions.create('transform', {
-    duration: theme.transitions.duration.shortest,
-  }),
-}));
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '1px solid #c4c4c4',
+  boxShadow: 24,
+  p: 4,
+};
 
 function RecipeReviewCard({ data }: ScheduleCardData) {
-  const [expanded, setExpanded] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleExpandClick = () => {
-    setExpanded(!expanded);
-  };
+  const toRemoveKeys: string[] = [
+    'serviceDayName',
+    'weekDayName',
+    'ministry',
+  ];
+
+  const gigRoles: string[] = [
+    'drummer',
+    'pianist',
+    'guitar_player',
+    'bassist',
+    'acoustic_guitar_player',
+    'horn_player',
+    'sax_player',
+  ];
+
+  const gigParticipants = Object.entries(data).filter(item => gigRoles.includes(item[0]));
+  const vocalParticipants = Object.entries(data)
+    .filter(item => !gigRoles.includes(item[0]))
+    .filter(item => !toRemoveKeys.includes(item[0]));
+
+  const listItems = [
+    {
+      name: 'Banda',
+      participants: gigParticipants,
+    },
+    {
+      name: 'Vocal',
+      participants: vocalParticipants,
+    }
+  ];
 
   return (
     <Card sx={{ maxWidth: 345 }}>
       <CardHeader
-        title={data.serviceDayName}
-        subheader="Fevereiro 14, 2024"
+        title={data.serviceDayName.split(' ')[0]}
+        subheader={data.weekDayName}
       />
       <CardContent>
-        <Typography variant="body2" color="text.secondary">
-          This impressive paella is a perfect party dish and a fun meal to cook
-          together with your guests. Add 1 cup of frozen peas along with the mussels,
-          if you like.
-        </Typography>
+        <Chip label={data.ministry} variant="outlined" />
       </CardContent>
-      <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
-        </IconButton>
-        <IconButton aria-label="share">
-        </IconButton>
-        <ExpandMore
-          expand={expanded}
-          onClick={handleExpandClick}
-          aria-expanded={expanded}
-          aria-label="show more"
+      <div>
+        <Button onClick={handleOpen}> Informaçoes </Button>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
         >
-          <ExpandMoreIcon />
-        </ExpandMore>
-      </CardActions>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <CardContent>
-          <Typography paragraph>Method:</Typography>
-          <Typography paragraph>
-            Heat 1/2 cup of the broth in a pot until simmering, add saffron and set
-            aside for 10 minutes.
-          </Typography>
-          <Typography paragraph>
-            Heat oil in a (14- to 16-inch) paella pan or a large, deep skillet over
-            medium-high heat. Add chicken, shrimp and chorizo, and cook, stirring
-            occasionally until lightly browned, 6 to 8 minutes. Transfer shrimp to a
-            large plate and set aside, leaving chicken and chorizo in the pan. Add
-            pimentón, bay leaves, garlic, tomatoes, onion, salt and pepper, and cook,
-            stirring often until thickened and fragrant, about 10 minutes. Add
-            saffron broth and remaining 4 1/2 cups chicken broth; bring to a boil.
-          </Typography>
-          <Typography paragraph>
-            Add rice and stir very gently to distribute. Top with artichokes and
-            peppers, and cook without stirring, until most of the liquid is absorbed,
-            15 to 18 minutes. Reduce heat to medium-low, add reserved shrimp and
-            mussels, tucking them down into the rice, and cook again without
-            stirring, until mussels have opened and rice is just tender, 5 to 7
-            minutes more. (Discard any mussels that don&apos;t open.)
-          </Typography>
-          <Typography>
-            Set aside off of the heat to let rest for 10 minutes, and then serve.
-          </Typography>
-        </CardContent>
-      </Collapse>
+          <Box sx={style}>
+            <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+              {`${data.serviceDayName.split(' ')[0]} - ${data.weekDayName}`}
+            </Typography>
+            <Typography variant='h6' id="modal-modal-description" sx={{ mt: 2 }}>
+              {`Ministro - ${data.ministry}`}
+            </Typography>
+            <List
+              sx={{
+                width: '100%',
+                maxWidth: 360,
+                bgcolor: 'background.paper',
+                position: 'relative',
+                overflow: 'auto',
+                maxHeight: 300,
+                '& ul': { padding: 0 },
+              }}
+              subheader={<li />}
+            >
+              {listItems
+                .map((item) => (
+                  <li key={`section-${item.name}`}>
+                    <ul>
+                      <ListSubheader>
+                        <ListItemText>{item.name}</ListItemText>
+                        <Divider />
+                      </ListSubheader>
+                      {item.participants.map(participant => (
+                        <ListItemButton>
+                          <ListItemIcon>
+                            {item.name === 'Banda' ? <LibraryMusicIcon /> : <MicExternalOnIcon />}
+                          </ListItemIcon>
+                          <ListItemText primary={`${getHeaderDescription(participant[0])} - ${participant[1]}`} />
+                        </ListItemButton>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+            </List>
+          </Box>
+        </Modal>
+      </div>
     </Card>
   );
 }
 
-export default function() {
-  return (
+export const CardSchedule = () => {
 
+  return (
     <Box sx={{ width: '100%' }}>
-      {data.map((item) => (
-        <RecipeReviewCard data={item} />
-      ))}
+      <Grid2 container spacing={2}>
+        {data.map((item) => (
+          <Grid2 xs={2}>
+            <RecipeReviewCard data={item} />
+          </Grid2>
+        ))}
+      </Grid2>
     </Box>
   )
 }
